@@ -10,12 +10,16 @@ export interface TodoItem {
   mode: Mode;
 }
 
+export type Tab = 'all' | 'active' | 'completed';
+
 interface InitialState {
-  list: TodoItem[]
+  list: TodoItem[],
+  tab: Tab
 }
 
 const initialState: InitialState = {
-  list: []
+  list: [],
+  tab: 'all'
 };
 
 const findItemById = (id: number, state: Draft<InitialState>) => state.list.find(item => item.id === id);
@@ -50,6 +54,9 @@ export const todoSlice = createSlice({
       if (item) {
         item.mode = action.payload.mode;
       }
+    },
+    changeTab(state, action: PayloadAction<Tab>) {
+      state.tab = action.payload;
     }
   }
 });
@@ -57,7 +64,7 @@ export const todoSlice = createSlice({
 
 export const getTodos = (state: RootState) => state.todo.list;
 
-export const {add, remove, toggle, edit, switchMode} = todoSlice.actions;
+export const {add, remove, toggle, edit, switchMode, changeTab} = todoSlice.actions;
 
 
 export default todoSlice.reducer;

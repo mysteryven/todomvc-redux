@@ -1,8 +1,8 @@
 import Todo from './todo';
 
 import {useAppDispatch, useAppSelector} from '../store';
-import {add, getTodos} from '../todoSlice';
-import React, {useState} from 'react';
+import {add, changeTab, getTodos, Tab, TodoItem} from '../todoSlice';
+import React, {ReactElement, useState} from 'react';
 
 let count = 10;
 const getId = () => {
@@ -14,6 +14,7 @@ const ENTER_KEY = 'ENTER';
 const Todos = () => {
   const [value, setValue] = useState('');
   const todos = useAppSelector(getTodos);
+  const tab = useAppSelector(state => state.todo.tab);
   const dispatch = useAppDispatch();
 
   function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -29,6 +30,15 @@ const Todos = () => {
     }));
   }
 
+  let filterTodos: TodoItem[];
+
+  if (tab === 'active') {
+    filterTodos = todos.filter(i => !i.done);
+  } else if (tab === 'completed') {
+    filterTodos = todos.filter(i => i.done);
+  } else {
+    filterTodos = todos;
+  }
 
   return (
     <section className="todoapp">
@@ -43,11 +53,9 @@ const Todos = () => {
           />
         </header>
         <section className="main">
-          <input id="toggle-all" className="toggle-all" type="checkbox"/>
-          <label htmlFor="toggle-all"/>
           <ul className="todo-list">
             {
-              todos.map(todo => (
+              filterTodos.map(todo => (
                 <Todo key={todo.id} item={todo}/>
               ))
             }
@@ -60,15 +68,15 @@ const Todos = () => {
           </span>
           <ul className="filters">
             <li>
-              <a href="#/" className="selected">All</a>
+              <SwitchTab thisTab="all" >All</SwitchTab>
             </li>
             <span> </span>
             <li>
-              <a href="#/active" className="">Active</a>
+              <SwitchTab thisTab="active">Active</SwitchTab>
             </li>
             <span> </span>
             <li>
-              <a href="#/completed" className="">Completed</a>
+              <SwitchTab thisTab="completed">Completed</SwitchTab>
             </li>
           </ul>
         </footer>
@@ -76,5 +84,19 @@ const Todos = () => {
     </section>
   );
 };
+
+function SwitchTab({thisTab, children}: { thisTab: Tab, children: ReactElement | string }) {
+  const tab = useAppSelector(state => state.todo.tab);
+  const dispatch = useAppDispatch();
+
+  function handleClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    e.preventDefault();
+    dispatch(changeTab(thisTab));
+  }
+
+  return (
+    <a onClick={handleClick} className={thisTab === tab ? 'selected' : ''}>{children}</a>
+  );
+}
 
 export default Todos;
